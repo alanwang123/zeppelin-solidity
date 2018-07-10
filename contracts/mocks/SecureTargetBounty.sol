@@ -1,5 +1,4 @@
-pragma solidity ^0.4.18;
-
+pragma solidity ^0.4.24;
 
 import {Bounty, Target} from "../../contracts/Bounty.sol";
 
@@ -9,6 +8,7 @@ contract SecureTargetMock is Target {
     return true;
   }
 }
+
 
 contract SecureTargetBounty is Bounty {
   function deployContract() internal returns (address) {

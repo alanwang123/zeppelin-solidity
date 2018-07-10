@@ -1,32 +1,33 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
-import '../ReentrancyGuard.sol';
-import './ReentrancyAttack.sol';
+import "../ReentrancyGuard.sol";
+import "./ReentrancyAttack.sol";
+
 
 contract ReentrancyMock is ReentrancyGuard {
 
   uint256 public counter;
 
-  function ReentrancyMock() public {
+  constructor() public {
     counter = 0;
   }
 
-  function count() private {
-    counter += 1;
+  function callback() external nonReentrant {
+    count();
   }
 
   function countLocalRecursive(uint256 n) public nonReentrant {
-    if(n > 0) {
+    if (n > 0) {
       count();
       countLocalRecursive(n - 1);
     }
   }
 
   function countThisRecursive(uint256 n) public nonReentrant {
-    bytes4 func = bytes4(keccak256("countThisRecursive(uint256)"));
-    if(n > 0) {
+    if (n > 0) {
       count();
-      bool result = this.call(func, n - 1);
+      // solium-disable-next-line security/no-low-level-calls
+      bool result = address(this).call(abi.encodeWithSignature("countThisRecursive(uint256)", n - 1));
       require(result == true);
     }
   }
@@ -37,8 +38,8 @@ contract ReentrancyMock is ReentrancyGuard {
     attacker.callSender(func);
   }
 
-  function callback() external nonReentrant {
-    count();
+  function count() private {
+    counter += 1;
   }
 
 }
